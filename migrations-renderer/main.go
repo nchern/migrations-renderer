@@ -17,22 +17,24 @@ var ()
 func init() {
 	log.SetFlags(0)
 
-	mustSetEnv("DB_IMAGE", "postgres:11-alpine")
-	mustSetEnv("DB_CONTAINER", "pg_host")
-	mustSetEnv("DB_USER", "postgres")
-	mustSetEnv("DB_PASSWD", "123")
+	must(setEnvIfEmpty("DB_IMAGE", "postgres:11-alpine"))
+	must(setEnvIfEmpty("DB_CONTAINER", "pg_host"))
+	must(setEnvIfEmpty("DB_USER", "postgres"))
+	must(setEnvIfEmpty("DB_PASSWD", "123"))
 
-	mustSetEnv("FLYWAY_IMAGE", "flyway/flyway:6.0.7-alpine")
-	mustSetEnv("FLYWAY_URL", expand("jdbc:postgresql://$DB_CONTAINER/postgres"))
+	must(setEnvIfEmpty("FLYWAY_IMAGE", "flyway/flyway:6.0.7-alpine"))
+	must(setEnvIfEmpty("FLYWAY_URL", expand("jdbc:postgresql://$DB_CONTAINER/postgres")))
 }
 
 func expand(s string) string {
-	s = os.ExpandEnv(s)
-	return s
+	return os.ExpandEnv(s)
 }
 
-func mustSetEnv(name string, value string) {
-	must(os.Setenv(name, value))
+func setEnvIfEmpty(name string, value string) error {
+	if os.Getenv(name) != "" {
+		return nil
+	}
+	return os.Setenv(name, value)
 }
 
 func dieIf(err error) {
@@ -66,8 +68,8 @@ func waitDBIsUp(maxTimeout time.Duration) {
 
 	for time.Now().Before(until) {
 		time.Sleep(waitTimeout)
-		n, _ := script.Exec("docker ps").Match(expand("$DB_CONTAINER")).CountLines()
-		if n > 0 {
+
+		if n, _ := script.Exec("docker ps").Match(expand("$DB_CONTAINER")).CountLines(); n > 0 {
 			break
 		}
 	}
@@ -115,7 +117,7 @@ func main() {
 	flywayPath, err := filepath.Abs(srcPath)
 	dieIf(err)
 
-	mustSetEnv("FLYWAY_PATH", flywayPath)
+	must(os.Setenv("FLYWAY_PATH", flywayPath))
 
 	dieIf(script.IfExists(flywayPath).Error())
 
