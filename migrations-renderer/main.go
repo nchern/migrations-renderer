@@ -96,7 +96,7 @@ func render() (err error) {
 	waitDBIsUp(2 * time.Second)
 
 	if _, err = stderr(exec(
-		"docker run --rm --link $DB_CONTAINER -v $FLYWAY_PATH:/flyway/sql -t $FLYWAY_IMAGE -url=$FLYWAY_URL -user=$DB_USER -password=$DB_PASSWD migrate")); err != nil {
+		"docker run --rm --link $DB_CONTAINER -v $FLYWAY_PATH:/flyway/sql -t $FLYWAY_IMAGE -url=$FLYWAY_URL -user=$DB_USER -password=$DB_PASSWD clean migrate")); err != nil {
 
 		return
 	}

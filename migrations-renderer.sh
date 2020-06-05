@@ -17,7 +17,7 @@ docker run --rm --name $DB_CONTAINER -e "POSTGRES_PASSWORD=$DB_PASSWD" -d $DB_IM
 
 sleep 1
 
-docker run --rm --link $DB_CONTAINER -v "$FLYWAY_PATH:/flyway/sql" -it $FLYWAY_IMAGE -url=$FLYWAY_URL -user=$DB_USER -password=$DB_PASSWD migrate 1>&2
+docker run --rm --link $DB_CONTAINER -v "$FLYWAY_PATH:/flyway/sql" -it $FLYWAY_IMAGE -url=$FLYWAY_URL -user=$DB_USER -password=$DB_PASSWD clean migrate 1>&2
 
 docker run --rm --link $DB_CONTAINER -e "PGPASSWORD=$DB_PASSWD" -it $DB_IMAGE pg_dump -s -h $DB_CONTAINER -U $DB_USER
 
